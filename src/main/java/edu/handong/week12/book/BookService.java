@@ -1,6 +1,11 @@
 package edu.handong.week12.book;
 
 import org.springframework.stereotype.Service;
+import edu.handong.week12.book.dto.BookRequest;
+import edu.handong.week12.book.dto.BookResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -11,25 +16,57 @@ public class BookService {
     this.repository = repository;
   }
 
-  public List<Book> findAll() {
-    return repository.findAll();
-  } // TODO STEP 6: Pagination/Sorting
+  public List<BookResponse> findAll() {
+    return repository.findAll().stream()
+            .map(this::toResponse)
+            .toList();
+  }
 
-  public Book findById(Long id) {
-    return repository.findById(id).orElseThrow();
-  } // TODO STEP 5: 404
+  public BookResponse findById(Long id) {
+    Book book = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Book not found"
+            ));
 
-  public Book create(Book book) {
-    return repository.save(book);
-  } // TODO STEP 3: DTO
+    return toResponse(book);
+  }
 
-  public Book update(Long id, Book input) {
-    Book book = findById(id);
-    book.update(input.getTitle(), input.getAuthor(), input.getPrice());
-    return repository.save(book);
+  public BookResponse create(BookRequest request) {
+    Book book = new Book(
+            request.title(),
+            request.author(),
+            request.price()
+    );
+
+    return toResponse(repository.save(book));
+  }
+
+  public BookResponse update(Long id, BookRequest input) {
+    Book book = findBook(id);
+
+    book.update(input.title(), input.author(), input.price());
+
+    return toResponse(repository.save(book));
   }
 
   public void delete(Long id) {
-    repository.deleteById(id);
-  } // TODO: 404 if absent
+    Book book = findBook(id);
+    repository.delete(book);
+  }
+
+  private Book findBook(Long id) {
+    return repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Book not found"
+            ));
+  }
+
+  private BookResponse toResponse(Book book) {
+    return new BookResponse(
+            book.getId(),
+            book.getTitle(),
+            book.getAuthor(),
+            book.getPrice()
+    );
+  }
 }

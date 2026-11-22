@@ -5,6 +5,8 @@ import edu.handong.week12.book.dto.BookRequest;
 import edu.handong.week12.book.dto.BookResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -16,10 +18,9 @@ public class BookService {
     this.repository = repository;
   }
 
-  public List<BookResponse> findAll() {
-    return repository.findAll().stream()
-            .map(this::toResponse)
-            .toList();
+  public Page<BookResponse> findAll(Pageable pageable) {
+    return repository.findAll(pageable)
+            .map(this::toResponse);
   }
 
   public BookResponse findById(Long id) {

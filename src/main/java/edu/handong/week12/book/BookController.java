@@ -6,6 +6,7 @@ import edu.handong.week12.book.dto.BookResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> create(@RequestBody BookRequest input) {
+    public ResponseEntity<BookResponse> create(@Valid @RequestBody BookRequest input) {
         BookResponse created = service.create(input);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -37,7 +38,7 @@ public class BookController {
     @PutMapping("/{id}")
     public ResponseEntity<BookResponse> update(
             @PathVariable Long id,
-            @RequestBody BookRequest input
+            @Valid @RequestBody BookRequest input
     ) {
         return ResponseEntity.ok(service.update(id, input));
     }
